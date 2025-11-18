@@ -1,0 +1,30 @@
+
+id: "hr"
+name: "HR, Recruiting & Learning Copilot"
+description: >
+  Answers HR questions, matches CVs to job descriptions, and suggests learning paths.
+  Designed with strong guardrails for fairness and data privacy.
+
+crew: "hr_crew_v1"
+
+langflow_flows:
+  policy_rag: "hr/hr_policy_rag.flow.json"
+  cv_matching: "hr/cv_matching.flow.json"
+
+mcp_virtual_server: "hr_toolbox"
+
+default_llm:
+  provider: "watsonx"
+  model: "granite-13b-instruct"
+  max_output_tokens: 2048
+
+risk_profile:
+  data_sensitivity: "very_high"
+  pii_expected: true
+  external_calls_allowed: tenant_configured
+
+tools_required:
+  - "hr_policy_rag.query"
+  - "cv_matching.run"
+  - "hr.get_employee_benefits"
+

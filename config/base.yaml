@@ -1,0 +1,11 @@
+app:
+  name: "Universal Copilot Platform"
+  log_level: "INFO"
+  http_port: 8000
+  feature_flags:
+    enable_swagger: true
+    enable_cors: true
+
+llm:
+  default_provider: "openai"
+  default_model: "gpt-4.1-mini"

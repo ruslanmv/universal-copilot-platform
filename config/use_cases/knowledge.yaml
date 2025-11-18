@@ -1,0 +1,29 @@
+
+id: "knowledge"
+name: "Enterprise Knowledge Search"
+description: >
+  Unified knowledge search for internal policies, architecture documents, and how-to guides.
+  Answers questions with citations, respecting document permissions.
+
+crew: "knowledge_crew_v1"
+
+langflow_flows:
+  rag: "knowledge/knowledge_rag.flow.json"
+
+mcp_virtual_server: "knowledge_toolbox"
+
+default_llm:
+  provider: "anthropic"
+  model: "claude-3.7-sonnet"
+  max_output_tokens: 4096
+
+risk_profile:
+  data_sensitivity: "high"
+  pii_expected: true
+  external_calls_allowed: true
+
+tools_required:
+  - "knowledge_rag.query"
+  - "storage.sharepoint.search"
+  - "storage.confluence.search"
+

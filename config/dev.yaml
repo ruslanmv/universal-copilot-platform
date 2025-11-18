@@ -1,0 +1,26 @@
+env: "dev"
+
+database:
+  # For dev: simple local Postgres instance
+  url: "postgresql+asyncpg://ucp:ucp@localhost:5432/ucp_dev"
+
+vector_store:
+  # Example: Qdrant / Milvus / Weaviate gateway
+  url: "http://localhost:6333"
+
+langflow:
+  base_url: "http://localhost:7860"
+
+mcp:
+  # Local Context Forge MCP gateway in dev
+  context_forge_url: "http://localhost:8001"
+
+providers:
+  openai:
+    api_base: "https://api.openai.com/v1"
+  anthropic:
+    api_base: "https://api.anthropic.com"
+  watsonx:
+    api_base: "https://us-south.ml.cloud.ibm.com"
+  ollama:
+    api_base: "http://localhost:11434"

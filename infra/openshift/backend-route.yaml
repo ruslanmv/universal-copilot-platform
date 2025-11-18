@@ -1,0 +1,18 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: copilot-backend
+  namespace: universal-copilot
+  labels:
+    app: backend
+spec:
+  host: copilot.apps.your-cluster-domain.com
+  to:
+    kind: Service
+    name: backend
+    weight: 100
+  port:
+    targetPort: 80
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

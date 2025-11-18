@@ -1,0 +1,102 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    image: ${BACKEND_IMAGE:-universal-copilot-backend:local}
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://copilot:copilot@postgres:5432/copilot}
+      VECTOR_DB_URL: ${VECTOR_DB_URL:-http://qdrant:6333}
+      LANGFLOW_BASE_URL: ${LANGFLOW_BASE_URL:-http://langflow:7860}
+      MCP_GATEWAY_URL: ${MCP_GATEWAY_URL:-http://mcp-context-forge:4444}
+    depends_on:
+      - postgres
+      - qdrant
+      - langflow
+      - mcp-context-forge
+    networks:
+      - copilot-net
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-copilot}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-copilot}
+      POSTGRES_DB: ${POSTGRES_DB:-copilot}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - copilot-net
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    restart: unless-stopped
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - copilot-net
+
+  langflow:
+    image: langflowai/langflow:latest
+    restart: unless-stopped
+    environment:
+      LANGFLOW_DATABASE_URL: ${LANGFLOW_DATABASE_URL:-sqlite:///./langflow.db}
+    ports:
+      - "7860:7860"
+    networks:
+      - copilot-net
+
+  mcp-context-forge:
+    image: ghcr.io/ibm/mcp-context-forge:0.9.0
+    restart: unless-stopped
+    environment:
+      HOST: 0.0.0.0
+      PORT: 4444
+      JWT_SECRET_KEY: ${MCP_JWT_SECRET_KEY:-change-me}
+      BASIC_AUTH_USER: ${MCP_ADMIN_USER:-admin}
+      BASIC_AUTH_PASSWORD: ${MCP_ADMIN_PASSWORD:-changeme}
+      AUTH_REQUIRED: "true"
+      MCPGATEWAY_UI_ENABLED: "true"
+      MCPGATEWAY_ADMIN_API_ENABLED: "true"
+      DATABASE_URL: ${MCP_DATABASE_URL:-sqlite:///./mcp.db}
+      SECURE_COOKIES: "false"
+    ports:
+      - "4444:4444"
+    networks:
+      - copilot-net
+
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+    networks:
+      - copilot-net
+
+  reverse-proxy:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    depends_on:
+      - backend
+    volumes:
+      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "80:80"
+    networks:
+      - copilot-net
+
+networks:
+  copilot-net:
+
+volumes:
+  postgres_data:
+  qdrant_data:
+  ollama_data:

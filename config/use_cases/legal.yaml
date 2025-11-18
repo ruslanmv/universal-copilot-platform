@@ -1,0 +1,30 @@
+
+id: "legal"
+name: "Legal, Compliance & Risk Copilot"
+description: >
+  Reviews contracts, flags risky clauses, compares language against playbooks
+  and regulations, and suggests alternative wording.
+
+crew: "legal_crew_v1"
+
+langflow_flows:
+  contract_review: "legal/contract_review.flow.json"
+  regulation_rag: "legal/regulation_rag.flow.json"
+
+mcp_virtual_server: "legal_toolbox"
+
+default_llm:
+  provider: "ollama"
+  model: "llama3.1-70b"
+  max_output_tokens: 4096
+
+risk_profile:
+  data_sensitivity: "very_high"
+  pii_expected: true
+  external_calls_allowed: false
+
+tools_required:
+  - "contract_rag.analyse"
+  - "regulation_rag.query"
+  - "legal_docs.search"
+

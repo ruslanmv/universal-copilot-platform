@@ -1,0 +1,66 @@
+# Example Context Forge configuration for Universal Copilot Platform.
+# This is NOT the full schema; adapt to the official mcp-context-forge config
+# format for your version.
+
+servers:
+  langflow-tools:
+    type: mcp
+    url: "http://langflow-tools-server:8000"  # our mcp/servers/langflow_tools_server.py
+    auth:
+      mode: none
+
+  crm:
+    type: mcp
+    url: "http://crm-mcp-server:8000"
+    auth:
+      mode: none
+
+  hris:
+    type: mcp
+    url: "http://hris-mcp-server:8000"
+    auth:
+      mode: none
+
+  legal-docs:
+    type: mcp
+    url: "http://legal-docs-mcp-server:8000"
+    auth:
+      mode: none
+
+virtual_servers:
+  support_toolbox:
+    description: "Support tools: RAG + CRM + ticketing."
+    upstream_tools:
+      - server: langflow-tools
+        tools:
+          - "support_rag.query"
+      - server: crm
+        tools:
+          - "crm.lookup_customer"
+      # ticket.create could be another MCP server or REST mapping
+    rate_limit:
+      requests_per_minute: 600
+
+  hr_toolbox:
+    description: "HR tools: policy RAG and HRIS."
+    upstream_tools:
+      - server: langflow-tools
+        tools:
+          - "hr_policy_rag.query"
+      - server: hris
+        tools:
+          - "hr.get_employee_benefits"
+    rate_limit:
+      requests_per_minute: 300
+
+  legal_toolbox:
+    description: "Legal tools: contract search and regulatory RAG."
+    upstream_tools:
+      - server: legal-docs
+        tools:
+          - "legal_docs.search"
+      - server: langflow-tools
+        tools:
+          - "regulation_rag.query"
+    rate_limit:
+      requests_per_minute: 200

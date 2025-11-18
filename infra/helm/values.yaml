@@ -1,0 +1,33 @@
+backend:
+  image: "your-registry/universal-copilot-backend:latest"
+  replicas: 2
+  resources:
+    requests:
+      cpu: "250m"
+      memory: "256Mi"
+    limits:
+      cpu: "1"
+      memory: "1Gi"
+
+langflow:
+  enabled: true
+  image: "langflowai/langflow:latest"
+
+mcpContextForge:
+  enabled: true
+  image: "ghcr.io/ibm/mcp-context-forge:latest"
+
+postgres:
+  enabled: true
+  image: "postgres:16"
+  storageSize: 20Gi
+
+vectorDb:
+  enabled: true
+  image: "qdrant/qdrant:latest"
+  storageSize: 50Gi
+
+ingress:
+  enabled: true
+  className: "nginx"
+  host: "copilot.example.com"

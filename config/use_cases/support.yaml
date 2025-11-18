@@ -1,0 +1,30 @@
+
+id: "support"
+name: "Customer Support Copilot"
+description: >
+  AI copilot for multi-channel customer support. Answers L1/L2 questions, drafts replies,
+  and escalates complex cases with summaries for human agents.
+
+crew: "support_crew_v1"
+
+langflow_flows:
+  rag: "support/support_rag.flow.json"
+  escalation: "support/support_escalation.flow.json"
+
+mcp_virtual_server: "support_toolbox"
+
+default_llm:
+  provider: "openai"
+  model: "gpt-4.1-mini"
+  max_output_tokens: 2048
+
+risk_profile:
+  data_sensitivity: "medium"
+  pii_expected: true
+  external_calls_allowed: true
+
+tools_required:
+  - "support_rag.query"
+  - "crm.lookup_customer"
+  - "ticket.create"
+

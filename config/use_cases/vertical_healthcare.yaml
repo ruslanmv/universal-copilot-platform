@@ -1,0 +1,33 @@
+
+id: "vertical_healthcare"
+name: "Healthcare Copilot"
+description: >
+  Drafts clinical notes, summarizes patient history, and surfaces relevant
+  protocols and guidelines. Intended for tightly controlled deployments only.
+
+crew: "vertical_healthcare_crew_v1"
+
+langflow_flows:
+  patient_history: "vertical_healthcare/patient_history.flow.json"
+  note_draft: "vertical_healthcare/note_drafting.flow.json"
+  protocol_rag: "vertical_healthcare/protocol_rag.flow.json"
+
+mcp_virtual_server: "healthcare_toolbox"
+
+default_llm:
+  provider: "ollama"
+  model: "llama3.1-70b"
+  max_output_tokens: 4096
+
+risk_profile:
+  data_sensitivity: "extreme"
+  pii_expected: true
+  external_calls_allowed: false
+
+tools_required:
+  - "patient_history.build"
+  - "note_draft.generate"
+  - "protocol_rag.query"
+  - "emr.get_patient_history"
+  - "emr.get_labs"
+

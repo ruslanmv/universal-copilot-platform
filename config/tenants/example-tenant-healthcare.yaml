@@ -1,0 +1,72 @@
+id: "tenant_healthcare"
+name: "CityCare Health System"
+description: >
+  Healthcare provider with strict PHI/PII requirements. All LLMs run in a private VPC
+  with Oy/Ollama and Watsonx; no external LLM calls allowed.
+
+default_provider: "ollama"
+default_region: "onprem"
+
+enabled_use_cases:
+  - support
+  - knowledge
+  - documents
+  - vertical_healthcare
+
+llm_policies:
+  support:
+    provider: "ollama"
+    model: "llama3.1-70b"
+    max_output_tokens: 2048
+
+  knowledge:
+    provider: "ollama"
+    model: "llama3.1-70b"
+    max_output_tokens: 4096
+
+  documents:
+    provider: "watsonx"
+    model: "ibm/granite-13b-instruct"
+    max_output_tokens: 1024
+
+  vertical_healthcare:
+    provider: "ollama"
+    model: "llama3.1-70b"
+    max_output_tokens: 4096
+
+tools_allowed:
+  support:
+    - "support_rag.query"
+
+  knowledge:
+    - "knowledge_rag.query"
+
+  documents:
+    - "invoice_extraction.run"
+    - "claims_extraction.run"
+
+  vertical_healthcare:
+    - "patient_history.build"
+    - "note_draft.generate"
+    - "protocol_rag.query"
+    - "emr.get_patient_history"
+    - "emr.get_labs"
+
+governance:
+  export_to_watsonx: true
+  risk_tier: "healthcare"
+  pii_allowed: true
+  external_providers_allowed: false
+  notes:
+    - "No PHI leaves the VPC."
+    - "All logs must be redacted or stored in a HIPAA-compliant system."
+
+data_residency:
+  region: "onprem"
+  vector_db_cluster: "qdrant-hospital"
+  postgres_cluster: "postgres-hospital"
+
+mcp_overrides:
+  mcp_gateway_url: "http://mcp-context-forge.universal-copilot.svc.cluster.local:4444"
+  virtual_servers:
+    vertical_healthcare: "healthcare_toolbox"

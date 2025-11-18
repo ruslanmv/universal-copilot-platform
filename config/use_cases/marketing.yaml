@@ -1,0 +1,29 @@
+
+id: "marketing"
+name: "Marketing & Content Studio"
+description: >
+  Campaign planning and content generation copilot. Generates on-brand copy for emails,
+  ads, webpages, and social posts using your brand book and product catalog.
+
+crew: "marketing_crew_v1"
+
+langflow_flows:
+  content: "marketing/marketing_content.flow.json"
+
+mcp_virtual_server: "marketing_toolbox"
+
+default_llm:
+  provider: "openai"
+  model: "gpt-4.1"
+  max_output_tokens: 4096
+
+risk_profile:
+  data_sensitivity: "low"
+  pii_expected: false
+  external_calls_allowed: true
+
+tools_required:
+  - "marketing_content.generate"
+  - "crm.lookup_customer"
+  - "analytics.campaign_performance"
+

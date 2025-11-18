@@ -1,0 +1,85 @@
+id: "tenant_eu_regulated"
+name: "EuroBank Group"
+description: >
+  EU-regulated financial institution. Requires data residency in the EU and strict
+  control over which providers are used. Prefers Watsonx and Claude, uses OpenAI only
+  for non-sensitive workloads.
+
+default_provider: "watsonx"
+default_region: "eu"
+
+enabled_use_cases:
+  - support
+  - knowledge
+  - finance
+  - documents
+  - legal
+
+llm_policies:
+  support:
+    provider: "watsonx"
+    model: "ibm/granite-13b-instruct"
+    max_output_tokens: 2048
+
+  knowledge:
+    provider: "anthropic"
+    model: "claude-3.7-sonnet"
+    max_output_tokens: 4096
+
+  finance:
+    provider: "watsonx"
+    model: "ibm/granite-34b-code-instruct"
+    max_output_tokens: 3072
+
+  documents:
+    provider: "watsonx"
+    model: "ibm/granite-13b-instruct"
+    max_output_tokens: 1024
+
+  legal:
+    provider: "ollama"
+    model: "llama3.1-70b"
+    max_output_tokens: 4096
+
+tools_allowed:
+  support:
+    - "support_rag.query"
+    - "crm.lookup_customer"
+    - "ticket.create"
+
+  knowledge:
+    - "knowledge_rag.query"
+    - "storage.sharepoint.search"
+
+  finance:
+    - "finance.nl_to_sql"
+    - "warehouse.query"
+    - "finance_docs_rag.query"
+
+  documents:
+    - "invoice_extraction.run"
+    - "claims_extraction.run"
+    - "erp.post_invoice"
+    - "claims_system.create_case"
+
+  legal:
+    - "contract_rag.analyse"
+    - "regulation_rag.query"
+    - "legal_docs.search"
+
+governance:
+  export_to_watsonx: true
+  risk_tier: "strict"
+  pii_allowed: true
+  external_providers_allowed: false
+  notes:
+    - "All LLM traffic must stay within EU data centers."
+    - "Legal flows must use on-prem or private LLM endpoints only."
+
+data_residency:
+  region: "eu"
+  vector_db_cluster: "qdrant-eu"
+  postgres_cluster: "postgres-eu"
+
+mcp_overrides:
+  mcp_gateway_url: "https://mcp-gateway.eu.yourdomain.com"

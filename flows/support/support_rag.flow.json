@@ -1,0 +1,48 @@
+{
+  "name": "Support RAG",
+  "description": "Retrieves answers from support knowledge base.",
+  "data": {
+    "nodes": [
+      {
+        "id": "input-node",
+        "type": "ChatInput",
+        "data": {
+          "input_value": ""
+        },
+        "position": { "x": 0, "y": 0 }
+      },
+      {
+        "id": "prompt-node",
+        "type": "Prompt",
+        "data": {
+          "template": "Process this request: {input}",
+          "input_variables": ["input"]
+        },
+        "position": { "x": 300, "y": 0 }
+      },
+      {
+        "id": "output-node",
+        "type": "ChatOutput",
+        "data": {
+          "input_value": ""
+        },
+        "position": { "x": 600, "y": 0 }
+      }
+    ],
+    "edges": [
+      {
+        "source": "input-node",
+        "target": "prompt-node",
+        "sourceHandle": "message",
+        "targetHandle": "input"
+      },
+      {
+        "source": "prompt-node",
+        "target": "output-node",
+        "sourceHandle": "message",
+        "targetHandle": "message"
+      }
+    ],
+    "viewport": { "x": 0, "y": 0, "zoom": 1 }
+  }
+}

@@ -1,0 +1,6 @@
+body { margin: 0; font-family: sans-serif; }
+.app { display: flex; min-height: 100vh; }
+.sidebar { width: 250px; background: #f4f4f4; padding: 20px; }
+.main { flex: 1; padding: 20px; }
+nav a { display: block; margin-bottom: 10px; text-decoration: none; color: #333; }
+nav a.active { font-weight: bold; }

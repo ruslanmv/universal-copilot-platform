@@ -1,0 +1,30 @@
+
+id: "finance"
+name: "Finance & BI Insights Copilot"
+description: >
+  Natural language BI for finance. Translates questions into SQL, runs them against
+  your data warehouse, and explains variances using financial documents.
+
+crew: "finance_crew_v1"
+
+langflow_flows:
+  nl_to_sql: "finance/nl_to_sql.flow.json"
+  docs_rag: "finance/finance_docs_rag.flow.json"
+
+mcp_virtual_server: "finance_toolbox"
+
+default_llm:
+  provider: "openai"
+  model: "gpt-4.1-mini"
+  max_output_tokens: 2048
+
+risk_profile:
+  data_sensitivity: "very_high"
+  pii_expected: possible
+  external_calls_allowed: tenant_configured
+
+tools_required:
+  - "finance.nl_to_sql"
+  - "finance_docs_rag.query"
+  - "warehouse.query"
+

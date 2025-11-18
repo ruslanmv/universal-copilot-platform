@@ -1,0 +1,31 @@
+
+id: "dev_it"
+name: "Dev & IT Helpdesk Copilot"
+description: >
+  Copilot for software developers and IT teams. Explains code, searches repos, and
+  assists with IT troubleshooting using internal runbooks.
+
+crew: "dev_it_crew_v1"
+
+langflow_flows:
+  code_rag: "dev_it/code_rag.flow.json"
+  it_kb_rag: "dev_it/it_kb_rag.flow.json"
+
+mcp_virtual_server: "dev_toolbox"
+
+default_llm:
+  provider: "openai"
+  model: "gpt-4.1"
+  max_output_tokens: 4096
+
+risk_profile:
+  data_sensitivity: "high"
+  pii_expected: false
+  external_calls_allowed: tenant_configured
+
+tools_required:
+  - "code_rag.query"
+  - "it_kb_rag.query"
+  - "ticket.servicenow.create"
+  - "repo.search"
+

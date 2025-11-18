@@ -1,0 +1,31 @@
+env: "prod"
+
+app:
+  log_level: "INFO"
+  http_port: 8080
+  feature_flags:
+    enable_swagger: false       # recommended to disable in public prod
+    enable_cors: true
+
+database:
+  # Use managed Postgres in prod; secrets via env (UCP_DATABASE__URL or full URL here if you prefer)
+  url: "postgresql+asyncpg://ucp_app:CHANGE_ME@postgres-master:5432/ucp"
+
+vector_store:
+  url: "http://vector-gateway:6333"
+
+langflow:
+  base_url: "http://langflow:7860"
+
+mcp:
+  context_forge_url: "http://mcp-context-forge:8001"
+
+providers:
+  openai:
+    api_base: "https://api.openai.com/v1"
+  anthropic:
+    api_base: "https://api.anthropic.com"
+  watsonx:
+    api_base: "https://us-south.ml.cloud.ibm.com"
+  ollama:
+    api_base: "http://ollama:11434"

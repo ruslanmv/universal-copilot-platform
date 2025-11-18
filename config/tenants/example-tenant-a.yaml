@@ -1,0 +1,34 @@
+id: "tenant_a"
+name: "Example Tenant A"
+default_provider: "openai"
+
+enabled_use_cases:
+  - support
+  - hr
+  - legal
+
+llm_policies:
+  support:
+    provider: "openai"
+    model: "gpt-4.1-mini"
+    max_tokens: 2048
+  hr:
+    provider: "watsonx"
+    model: "ibm/granite-13b-chat"
+    max_tokens: 2048
+  legal:
+    provider: "anthropic"
+    model: "claude-3.7-sonnet"
+    max_tokens: 4096
+
+tools_allowed:
+  support:
+    - "support_rag.query"
+    - "crm.lookup_customer"
+    - "ticket.create"
+  hr:
+    - "hr_policy_rag.query"
+    - "cv.match"
+  legal:
+    - "contract_review.analyse"
+    - "regulation_rag.query"

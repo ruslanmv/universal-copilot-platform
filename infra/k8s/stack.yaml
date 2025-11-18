@@ -1,0 +1,306 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: copilot-config
+  namespace: universal-copilot
+data:
+  APP_ENV: "prod"
+  LANGFLOW_BASE_URL: "http://langflow:7860"
+  MCP_GATEWAY_URL: "http://mcp-context-forge:4444"
+  VECTOR_DB_URL: "http://qdrant:6333"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: copilot-secrets
+  namespace: universal-copilot
+type: Opaque
+stringData:
+  DATABASE_URL: "postgresql+psycopg://copilot:copilot@postgres:5432/copilot"
+  OPENAI_API_KEY: "change-me"
+  ANTHROPIC_API_KEY: "change-me"
+  WATSONX_API_KEY: "change-me"
+  MCP_JWT_SECRET_KEY: "change-me"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: universal-copilot
+  labels:
+    app: backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: backend
+          image: ghcr.io/your-org/universal-copilot-backend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: copilot-config
+            - secretRef:
+                name: copilot-secrets
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 20
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "2Gi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: universal-copilot
+spec:
+  selector:
+    app: backend
+  ports:
+    - port: 80
+      targetPort: 8000
+      protocol: TCP
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: universal-copilot
+spec:
+  serviceName: postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: "copilot"
+            - name: POSTGRES_PASSWORD
+              value: "copilot"
+            - name: POSTGRES_DB
+              value: "copilot"
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 20Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: universal-copilot
+spec:
+  selector:
+    app: postgres
+  ports:
+    - port: 5432
+      targetPort: 5432
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qdrant
+  namespace: universal-copilot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qdrant
+  template:
+    metadata:
+      labels:
+        app: qdrant
+    spec:
+      containers:
+        - name: qdrant
+          image: qdrant/qdrant:latest
+          ports:
+            - containerPort: 6333
+          volumeMounts:
+            - name: qdrant-storage
+              mountPath: /qdrant/storage
+      volumes:
+        - name: qdrant-storage
+          emptyDir: {}  # replace with PVC in real prod
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qdrant
+  namespace: universal-copilot
+spec:
+  selector:
+    app: qdrant
+  ports:
+    - port: 6333
+      targetPort: 6333
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: langflow
+  namespace: universal-copilot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: langflow
+  template:
+    metadata:
+      labels:
+        app: langflow
+    spec:
+      containers:
+        - name: langflow
+          image: langflowai/langflow:latest
+          ports:
+            - containerPort: 7860
+          env:
+            - name: LANGFLOW_DATABASE_URL
+              value: "sqlite:///./langflow.db"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: langflow
+  namespace: universal-copilot
+spec:
+  selector:
+    app: langflow
+  ports:
+    - port: 7860
+      targetPort: 7860
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcp-context-forge
+  namespace: universal-copilot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mcp-context-forge
+  template:
+    metadata:
+      labels:
+        app: mcp-context-forge
+    spec:
+      containers:
+        - name: mcp-context-forge
+          image: ghcr.io/ibm/mcp-context-forge:0.9.0
+          ports:
+            - containerPort: 4444
+          env:
+            - name: HOST
+              value: "0.0.0.0"
+            - name: PORT
+              value: "4444"
+            - name: JWT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: copilot-secrets
+                  key: MCP_JWT_SECRET_KEY
+            - name: BASIC_AUTH_USER
+              value: "admin"
+            - name: BASIC_AUTH_PASSWORD
+              value: "changeme"
+            - name: AUTH_REQUIRED
+              value: "true"
+            - name: MCPGATEWAY_UI_ENABLED
+              value: "true"
+            - name: MCPGATEWAY_ADMIN_API_ENABLED
+              value: "true"
+            - name: DATABASE_URL
+              value: "sqlite:///./mcp.db"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 4444
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4444
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mcp-context-forge
+  namespace: universal-copilot
+spec:
+  selector:
+    app: mcp-context-forge
+  ports:
+    - port: 4444
+      targetPort: 4444
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: copilot-ingress
+  namespace: universal-copilot
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - host: copilot.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 80

@@ -1,0 +1,31 @@
+
+id: "sales"
+name: "Sales & CRM Copilot"
+description: >
+  Copilot for sales reps and managers. Summarizes calls, updates CRM records,
+  drafts follow-up emails, and highlights at-risk deals.
+
+crew: "sales_crew_v1"
+
+langflow_flows:
+  call_summary: "sales/call_summary.flow.json"
+  email: "sales/sales_email.flow.json"
+
+mcp_virtual_server: "sales_toolbox"
+
+default_llm:
+  provider: "openai"
+  model: "gpt-4.1-mini"
+  max_output_tokens: 2048
+
+risk_profile:
+  data_sensitivity: "medium"
+  pii_expected: true
+  external_calls_allowed: true
+
+tools_required:
+  - "sales.call_summary"
+  - "sales.email_generate"
+  - "crm.lookup_customer"
+  - "crm.update_opportunity"
+

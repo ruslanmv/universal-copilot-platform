@@ -1,0 +1,31 @@
+
+id: "documents"
+name: "Document Processing & Automation Copilot"
+description: >
+  Extracts structured data from invoices, claims, and forms. Validates against
+  business rules and triggers downstream workflows.
+
+crew: "documents_crew_v1"
+
+langflow_flows:
+  invoice: "documents/invoice_extraction.flow.json"
+  claims: "documents/claims_extraction.flow.json"
+
+mcp_virtual_server: "documents_toolbox"
+
+default_llm:
+  provider: "watsonx"
+  model: "granite-13b-instruct"
+  max_output_tokens: 1024
+
+risk_profile:
+  data_sensitivity: "high"
+  pii_expected: true
+  external_calls_allowed: tenant_configured
+
+tools_required:
+  - "invoice_extraction.run"
+  - "claims_extraction.run"
+  - "erp.post_invoice"
+  - "claims_system.create_case"
+

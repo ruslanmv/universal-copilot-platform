@@ -1,0 +1,78 @@
+[build-system]
+requires = ["hatchling>=1.22.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "universal-copilot-platform"
+version = "0.1.0"
+description = "Universal multi-tenant AI copilot platform (CrewAI + Langflow + MCP + multi-LLM)."
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+license = { text = "Proprietary" }
+authors = [
+  { name = "Your Company", email = "dev@yourcompany.com" },
+]
+
+dependencies = [
+  # Web API
+  "fastapi>=0.115.0",
+  "uvicorn[standard]>=0.30.0",
+
+  # Config & validation
+  "pydantic>=2.8.0",
+  "pydantic-settings>=2.3.0",
+  "pyyaml>=6.0.0",
+
+  # DB & ORM
+  "sqlalchemy>=2.0.35",
+  "asyncpg>=0.28.0",          # async Postgres driver
+  "alembic>=1.13.2",
+
+  # HTTP client
+  "httpx[http2]>=0.27.0",
+
+  # LLMs / multi-agent / Langflow
+  "openai>=1.51.0",
+  "anthropic>=0.40.0",
+  "crewai[tools]>=0.60.0",
+  # langflow is typically deployed as a separate service; we just need an HTTP client:
+  # "langflow>=1.0.0",  # optional, only if you embed it
+
+  # MCP / SSE / WS (for Context Forge, etc.)
+  "websockets>=12.0",
+  "sse-starlette>=2.1.0",
+
+  # Misc
+  "python-dotenv>=1.0.1",
+  "loguru>=0.7.2",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0.0",
+  "pytest-asyncio>=0.23.0",
+  "httpx>=0.27.0",
+  "ruff>=0.5.0",
+  "mypy>=1.10.0",
+]
+
+[project.scripts]
+# This is the main CLI entrypoint for uvx:
+universal-copilot = "backend.universal_copilot.main:cli"
+
+[tool.uv]
+# You can pin Python or required environments if you like
+# required-python = ">=3.11,<3.14"
+
+[tool.uv.sources]
+# Tell uv where to find the package code
+backend = { path = "backend" }
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+strict = false
+ignore_missing_imports = true

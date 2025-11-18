@@ -1,0 +1,74 @@
+id: "tenant_global_saas"
+name: "Acme Global SaaS Inc."
+description: >
+  Default multi-region SaaS tenant. Uses mostly OpenAI and Anthropic for LLMs.
+  Data is stored in shared, but logically isolated, multi-tenant infrastructure.
+
+default_provider: "openai"
+default_region: "global"
+
+enabled_use_cases:
+  - support
+  - knowledge
+  - dev_it
+  - marketing
+  - sales
+
+llm_policies:
+  support:
+    provider: "openai"
+    model: "gpt-4.1-mini"
+    max_output_tokens: 2048
+
+  knowledge:
+    provider: "anthropic"
+    model: "claude-3.7-sonnet"
+    max_output_tokens: 4096
+
+  dev_it:
+    provider: "openai"
+    model: "gpt-4.1"
+    max_output_tokens: 4096
+
+  marketing:
+    provider: "openai"
+    model: "gpt-4.1"
+    max_output_tokens: 4096
+
+  sales:
+    provider: "openai"
+    model: "gpt-4.1-mini"
+    max_output_tokens: 2048
+
+tools_allowed:
+  support:
+    - "support_rag.query"
+    - "crm.lookup_customer"
+    - "ticket.create"
+
+  knowledge:
+    - "knowledge_rag.query"
+    - "storage.sharepoint.search"
+    - "storage.confluence.search"
+
+  dev_it:
+    - "code_rag.query"
+    - "it_kb_rag.query"
+    - "ticket.servicenow.create"
+
+  marketing:
+    - "marketing_content.generate"
+    - "crm.lookup_customer"
+    - "analytics.campaign_performance"
+
+  sales:
+    - "sales.call_summary"
+    - "sales.email_generate"
+    - "crm.lookup_customer"
+    - "crm.update_opportunity"
+
+governance:
+  export_to_watsonx: true
+  risk_tier: "standard"
+  pii_allowed: true
+  external_providers_allowed: true
