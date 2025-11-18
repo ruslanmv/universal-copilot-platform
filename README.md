@@ -1,764 +1,541 @@
 # Universal Copilot Platform
 
-Multi-tenant, MCP-first, enterprise-grade copilot platform that runs **all your AI use cases** (support, sales, HR, legal, finance, dev/IT, etc.) on **any LLM provider**:
+<div align="center">
 
-- OpenAI, Anthropic Claude, IBM watsonx.ai, Ollama (self-hosted)
-- CrewAI multi-agent orchestration
-- Langflow RAG & tool flows
-- IBM **mcp-context-forge** as MCP gateway/registry
+**Enterprise-Grade Multi-Tenant AI Copilot Platform**
 
-The platform is a single app; each “copilot” is just:
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Python](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/downloads/)
+[![uv](https://img.shields.io/badge/uv-managed-green)](https://github.com/astral-sh/uv)
+[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 
-> **CrewAI crew + Langflow flow(s) + configuration**
+[Features](#features) •
+[Architecture](#architecture) •
+[Quick Start](#quick-start) •
+[Installation](#installation) •
+[Documentation](#documentation) •
+[Contributing](#contributing)
+
+</div>
+
+---
+
+## About
+
+The **Universal Copilot Platform** is a production-ready, multi-tenant AI copilot system that enables organizations to deploy and manage 10+ specialized AI use cases from a single codebase. Built on modern AI orchestration frameworks and designed for enterprise scalability, it provides a unified platform for customer support, HR, legal, finance, sales, marketing, and more.
+
+### Key Highlights
+
+- **Multi-Tenant Architecture**: Isolated configurations per tenant with fine-grained access control
+- **Provider Agnostic**: Works seamlessly with OpenAI, Anthropic Claude, IBM watsonx.ai, or self-hosted Ollama
+- **MCP-First Integration**: Built on Model Context Protocol with IBM mcp-context-forge gateway
+- **CrewAI Orchestration**: Sophisticated multi-agent workflows for complex tasks
+- **Langflow Integration**: Visual RAG and tool flows for rapid prototyping
+- **Production Ready**: Includes monitoring, governance, and enterprise deployment patterns
 
 ---
 
 ## Features
 
-- ✅ **Single codebase**, 10+ enterprise copilots
-- ✅ **Multi-tenant**, per-tenant use-case & provider config
-- ✅ **Multi-provider LLM gateway** (OpenAI / Claude / watsonx.ai / Ollama)
-- ✅ **CrewAI multi-agent orchestration**
-- ✅ **Langflow** for visual RAG / tools (via HTTP / MCP)
-- ✅ **MCP-first** integration with **IBM mcp-context-forge**
-- ✅ **uv-based** Python project (fast, reproducible, modern packaging)
-- ✅ **Deployable via Docker, docker-compose, Kubernetes, OpenShift**
+### Core Capabilities
+
+| Feature | Description |
+|---------|-------------|
+| 🏢 **Multi-Tenancy** | Complete tenant isolation with per-tenant use case configuration |
+| 🤖 **Multi-LLM Support** | OpenAI, Anthropic, watsonx.ai, Ollama with unified gateway |
+| 🔧 **10+ Use Cases** | Support, HR, Legal, Finance, DevOps, Sales, Marketing, and more |
+| 🎯 **MCP Protocol** | Standards-based tool integration via Model Context Protocol |
+| 🌊 **Langflow Flows** | 19 pre-built flows for RAG, extraction, and workflow automation |
+| 👥 **CrewAI Agents** | Multi-agent orchestration with specialized roles |
+| 📊 **Governance & Compliance** | Complete audit logs, token tracking, and usage metrics |
+| 🚀 **Cloud Native** | Docker, Kubernetes, OpenShift deployment ready |
+
+### Supported Use Cases
+
+- **Customer Support**: Intelligent ticket routing, knowledge base RAG, escalation management
+- **HR & Recruiting**: CV matching, policy Q&A, onboarding automation
+- **Legal**: Contract review, clause extraction, regulatory compliance
+- **Finance**: NL-to-SQL analytics, document extraction, financial Q&A
+- **DevOps/IT**: Code search, documentation RAG, incident management
+- **Sales**: Lead qualification, email generation, call summarization
+- **Marketing**: Content generation, campaign ideation
+- **Healthcare**: Patient history, protocol search, clinical note drafting
+- **Knowledge Management**: Enterprise search across all documents
+- **Document Processing**: Invoice/claims extraction and classification
 
 ---
 
-## Repository Layout (high-level)
+## Architecture
 
-```text
-.
-├── README.md
-├── pyproject.toml
-├── Makefile
-├── docker-compose.yml
-├── backend/
-│   ├── Dockerfile
-│   └── universal_copilot/
-│       ├── main.py
-│       ├── settings.py
-│       ├── ...
-├── config/
-│   ├── base.yaml
-│   ├── dev.yaml
-│   ├── prod.yaml
-│   ├── tenants/
-│   └── use_cases/
-├── infra/
-│   ├── k8s/
-│   └── openshift/
-├── .github/
-│   └── workflows/
-│       ├── ci.yml
-│       └── docker-build.yml
-└── docs/
-    └── use-cases/
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     API Layer (FastAPI)                      │
+│  Multi-tenant routing • Auth • Rate limiting • Health checks │
+└─────────────────────────────────────────────────────────────┘
+                              │
+        ┌─────────────────────┼─────────────────────┐
+        ▼                     ▼                     ▼
+┌──────────────┐    ┌──────────────────┐    ┌─────────────┐
+│  LLM Gateway │    │  CrewAI Crews    │    │  MCP Client │
+│              │    │                  │    │             │
+│ • OpenAI     │    │ • Support Crew   │    │ Context     │
+│ • Anthropic  │◄───┤ • HR Crew        │───►│ Forge       │
+│ • watsonx.ai │    │ • Legal Crew     │    │             │
+│ • Ollama     │    │ • Finance Crew   │    └─────────────┘
+└──────────────┘    └──────────────────┘           │
+                              │                     │
+                    ┌─────────┴─────────┐          │
+                    ▼                   ▼          ▼
+            ┌──────────────┐    ┌──────────────────────┐
+            │   RAG Layer  │    │   MCP Tool Servers   │
+            │              │    │                      │
+            │ • Vector DB  │    │ • Langflow Flows     │
+            │ • Embeddings │    │ • CRM Integration    │
+            │ • Chunking   │    │ • HRIS Integration   │
+            └──────────────┘    │ • Legal Docs Search  │
+                                └──────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│              Infrastructure & Data Layer                     │
+│  PostgreSQL • Qdrant/Milvus • Redis • Langflow • Kubernetes │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-## Quickstart – Local Dev
+### Design Principles
 
-### Clone the repo
+1. **Configuration Over Code**: Enable/disable use cases via YAML, not deployments
+2. **Gateway Pattern**: Single LLM gateway abstracts provider differences
+3. **MCP-First**: All tools exposed via Model Context Protocol for interoperability
+4. **Crew-Based**: Each use case is a CrewAI crew + Langflow flows + config
+5. **Multi-Tenant Native**: Tenant context flows through every layer
+
+---
+
+## Quick Start
+
+### Prerequisites
+
+- Python 3.11 or 3.12
+- Docker & Docker Compose (for local stack)
+- `uv` package manager (will be installed automatically)
+
+### 5-Minute Setup
 
 ```bash
-git clone [https://github.com/your-org/universal-copilot-platform.git](https://github.com/your-org/universal-copilot-platform.git)
+# 1. Clone the repository
+git clone https://github.com/ruslanmv/universal-copilot-platform.git
 cd universal-copilot-platform
-```
 
-### Create env file
+# 2. Install dependencies
+make install
 
-```bash
+# 3. Configure environment
 cp .env.example .env
-# Edit LLM API keys, DB passwords, etc.
+# Edit .env with your API keys (OpenAI, Anthropic, etc.)
+
+# 4. Start the stack
+make compose-up
+
+# 5. Run development server
+make dev
 ```
 
-### Install Python deps with uv
+Access the platform:
+- **API Documentation**: http://localhost:8000/docs
+- **Langflow UI**: http://localhost:7860
+- **MCP Context Forge**: http://localhost:4444/admin
+
+---
+
+## Installation
+
+### Using UV (Recommended)
 
 ```bash
-curl -LsSf [https://astral.sh/uv/install.sh](https://astral.sh/uv/install.sh) | sh
-uv sync --locked --all-extras --dev
+# Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install all dependencies
+uv sync --all-extras
+
+# Run the application
+uv run uvicorn backend.universal_copilot.main:app --reload
 ```
 
-### Run backing services + backend
+### Using Make
 
 ```bash
-# Start Postgres, vector DB, Langflow, MCP Context Forge, etc.
-docker compose up -d
+# Complete development setup
+make setup
 
-# Run API locally with auto-reload
-uv run uvicorn backend.universal_copilot.main:app \
-  --reload --host 0.0.0.0 --port 8000
+# Install dependencies only
+make install
+
+# Install with dev tools
+make install-dev
 ```
 
-### Open the API docs
-
-* Backend API: http://localhost:8000/docs
-* Langflow UI: http://localhost:7860/
-* MCP Gateway (Context Forge): http://localhost:4444/admin
-
-## Production – Docker & docker-compose
+### Docker
 
 ```bash
-# Build backend image
-docker build -f backend/Dockerfile \
-  -t ghcr.io/your-org/universal-copilot-backend:latest .
+# Build the image
+make docker-build
 
-# Run with compose (single box / small env)
-docker compose -f docker-compose.yml up -d
+# Run with docker-compose
+make compose-up
 ```
+
+### Kubernetes
+
+```bash
+# Deploy to Kubernetes
+make k8s-apply
+
+# Check status
+kubectl -n universal-copilot get pods
+```
+
+---
 
 ## Configuration
 
-* Non-secret config in `config/base.yaml`, `config/dev.yaml`, `config/prod.yaml`
-* Per-tenant configuration in `config/tenants/*.yaml`
-* Secrets (LLM keys, DB creds) via Environment Variables or K8s Secrets.
+### Environment Variables
 
+Create a `.env` file in the project root:
 
-I’ll walk through **all the files**, but **sorted by importance for development** so a team can actually build this step-by-step and not drown in details.
+```env
+# Environment
+UCP_ENV=dev
 
-Think of it as **“what to implement first, second, third…”** and **what goes inside each file**.
+# Database
+UCP_DATABASE__URL=postgresql+asyncpg://user:pass@localhost:5432/copilot
 
----
+# Vector Store
+UCP_VECTOR_STORE__URL=http://localhost:6333
 
+# Langflow
+UCP_LANGFLOW__BASE_URL=http://localhost:7860
 
-### 1. `pyproject.toml`  ✅
+# MCP Context Forge
+UCP_MCP__CONTEXT_FORGE_URL=http://localhost:4444
 
-**Why:** This is the heart of the Python/uv project. Without it, nothing runs.
+# LLM API Keys
+UCP_OPENAI_API_KEY=sk-...
+UCP_ANTHROPIC_API_KEY=sk-ant-...
+UCP_WATSONX_API_KEY=...
+UCP_WATSONX_PROJECT_ID=...
+```
 
-**Should contain:**
+### Tenant Configuration
 
-* Project metadata: `name = "universal-copilot-platform"`, version, authors.
-* Tooling config for **uv** (dependencies, optional scripts). uv is a fast, all-in-one Python project manager that replaces pip/poetry/pyenv/etc. ([GitHub][1])
-* Dependencies:
+Define tenants in `config/tenants/*.yaml`:
 
-  * `fastapi`, `uvicorn[standard]` – HTTP API server. ([FastAPI][2])
-  * `pydantic` – settings & schemas.
-  * `sqlalchemy`, `alembic` – DB + migrations.
-  * `httpx` or `aiohttp` – HTTP client (LLM, MCP, Context Forge).
-  * `crewai` – multi-agent framework. ([CrewAI Documentation][3])
-  * `langflow` client / SDK or generic HTTP client.
-  * MCP client library (or generic SSE/WebSocket client) to talk to Context Forge.
-  * SDKs: `openai`, Anthropic client, watsonx SDK or generic REST client, etc.
-  * `python-dotenv` (optional) for env loading in dev.
-* `[project.scripts]` entry:
+```yaml
+id: acme-corp
+name: Acme Corporation
+default_provider: openai
+enabled_use_cases:
+  - support
+  - hr
+  - legal
 
-  * `universal-copilot = "backend.universal_copilot.main:cli"` so devs can run `uvx universal-copilot dev`. ([docs.astral.sh][4])
+llm_policies:
+  support:
+    provider: anthropic
+    model: claude-3-5-sonnet-20241022
+    max_tokens: 4096
+  hr:
+    provider: openai
+    model: gpt-4o
+    max_tokens: 2048
+```
 
----
+### Use Case Configuration
 
-### 2. `backend/universal_copilot/main.py`  ✅
+Define use cases in `config/use_cases/*.yaml`:
 
-**Why:** FastAPI app entrypoint; everything hangs off this. ([FastAPI][2])
-
-**Should contain:**
-
-* `FastAPI()` app instantiation with metadata (title, version, docs URLs).
-* Include routers from `api/router.py`.
-* Startup/shutdown events:
-
-  * Initialize DB engine / session maker.
-  * Initialize LLM provider registry, quota manager.
-  * Initialize MCP host client pointing at Context Forge endpoint.
-* Optional CLI using `typer` or `argparse`:
-
-  * `dev` – run uvicorn for local dev.
-  * `serve` – production run (delegated to uvicorn/gunicorn in container).
-
----
-
-### 3. `backend/universal_copilot/settings.py`  ✅
-
-**Why:** Central config; avoids env-variable chaos.
-
-**Should contain:**
-
-* A `Settings` class (Pydantic `BaseSettings`) with fields:
-
-  * `env` (dev/stage/prod), `app_name`, `log_level`.
-  * DB URL, vector DB URL, object storage URL.
-  * Context Forge MCP endpoint URL.
-  * Langflow base URL.
-  * API keys / endpoints for OpenAI/Claude/watsonx.ai where appropriate.
-* Logic to load:
-
-  * `.env` + `config/base.yaml` + `config/{env}.yaml` + env overrides.
-* A singleton getter: `get_settings()`.
+```yaml
+id: support
+name: Customer Support Copilot
+description: Intelligent customer support with RAG and escalation
+crew_name: support_crew_v1
+flow_ids:
+  rag: support/support_rag.flow.json
+  escalation: support/support_escalation.flow.json
+mcp_virtual_server: support_toolbox
+```
 
 ---
 
-### 4. `config/base.yaml`, `config/dev.yaml`, `config/prod.yaml`  ✅
+## Usage
 
-**Why:** Non-secret configuration for environments.
+### Python API
 
-**Should contain:**
+```python
+from backend.universal_copilot.crew.registry import get_crew
+from backend.universal_copilot.schemas.support import SupportQuery
 
-* Global defaults:
+# Get tenant context (from auth middleware in real app)
+tenant = {...}
 
-  * HTTP port, log level, feature flags.
-  * Default LLM provider/model per use case (can be overridden by tenant).
-* `dev.yaml`:
+# Get the support crew for this tenant
+crew = get_crew("support", tenant)
 
-  * Local services endpoints (Local Postgres, local vector DB, local Langflow, local Context Forge).
-* `prod.yaml`:
+# Run the crew
+query = SupportQuery(
+    message="How do I reset my password?",
+    channel="web",
+)
 
-  * External endpoints, timeouts, feature toggles (e.g., disable Swagger).
+result = await crew.run_support_flow(query)
+print(result.answer)
+```
 
----
+### REST API
 
-### 5. `backend/universal_copilot/db/session.py`  ✅
+```bash
+# Query support copilot
+curl -X POST http://localhost:8000/api/v1/support/query \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <token>" \
+  -d '{
+    "message": "How do I reset my password?",
+    "channel": "web"
+  }'
+```
 
-**Why:** Single source of truth for DB connection.
+### CLI
 
-**Should contain:**
+```bash
+# Run development server
+universal-copilot dev
 
-* `engine = create_engine(settings.DATABASE_URL, ...)`
-* `SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)`
-* Dependency helpers for FastAPI:
-
-  * `get_db()` that yields a session and handles commit/rollback.
-
----
-
-### 6. `backend/universal_copilot/db/models.py`  ✅
-
-**Why:** Models for tenants, use cases, providers, logs.
-
-**Should contain (minimum):**
-
-* `Tenant`:
-
-  * `id`, `name`, `default_provider`, `enabled_use_cases`, etc.
-* `UseCase`:
-
-  * `id`, `name`, `description`.
-* `TenantUseCaseConfig`:
-
-  * `tenant_id`, `use_case_id`, `crew_name`, `flow_ids`, `llm_policy`.
-* `ProviderConfig`:
-
-  * mapping tenant → provider → config (no secrets; secrets in env/secret store).
-* `LLMCallLog`, `ToolCallLog`:
-
-  * `tenant_id`, `use_case`, `provider`, `model`, `tokens`, `latency`, `status`, etc. (needed for governance & metrics).
-* Optional `DocumentSource`, `VectorIndex` for RAG metadata.
+# Run production server
+universal-copilot serve --workers 4
+```
 
 ---
 
-### 7. `backend/universal_copilot/api/router.py`  ✅
+## Development
 
-**Why:** Single place to register all routes (modular). ([Medium][5])
+### Makefile Commands
 
-**Should contain:**
+```bash
+make help            # Show all available commands
+make install         # Install dependencies
+make dev             # Run development server
+make test            # Run tests
+make test-cov        # Run tests with coverage
+make lint            # Run linter
+make format          # Format code
+make typecheck       # Run type checker
+make qa              # Run all quality checks
+make ci              # Run full CI pipeline
+```
 
-* `APIRouter()` and `include_router(...)` calls for:
+### Code Quality
 
-  * `routes_health`, `routes_admin`, `routes_support`, `routes_hr`, etc.
-* Versioned path prefix: `/api/v1`.
+This project maintains high code quality standards:
 
----
+- **Linting**: Ruff with comprehensive rule set
+- **Formatting**: Ruff formatter (Black-compatible)
+- **Type Checking**: MyPy with strict settings
+- **Testing**: Pytest with async support
+- **Coverage**: Minimum 80% coverage target
+- **Pre-commit**: Automated checks before commit
 
-### 8. `backend/universal_copilot/api/routes_health.py`  ✅
+### Testing
 
-**Why:** Health/ready checks for K8s, monitoring.
+```bash
+# Run all tests
+make test
 
-**Should contain:**
+# Run with coverage
+make test-cov
 
-* `GET /health` – returns simple JSON.
-* `GET /ready` – checks DB connection and (optionally) Context Forge and Langflow.
+# Run specific test file
+uv run pytest tests/test_llm_gateway.py -v
 
----
-
-### 9. `backend/universal_copilot/auth/middleware.py`  ✅
-
-**Why:** Multi-tenant + user context.
-
-**Should contain:**
-
-* FastAPI middleware that:
-
-  * Parses JWT/OIDC token (or API key).
-  * Resolves `tenant_id`, `user_id`, roles.
-  * Attaches to `request.state` or returns `401/403` if invalid.
-* Optional integration with external IdP (Keycloak, Azure AD, etc.).
-
----
-
----
-
-## Tier 1 – Domain APIs & Schemas
-
-Once Tier 0 exists, you can serve basic endpoints.
-
-### 10. `backend/universal_copilot/schemas/*.py`  ✅
-
-**Why:** Type-safe IO for each use case (FastAPI + Pydantic). ([realpython.com][6])
-
-**Each file should contain:**
-
-* `support.py`:
-
-  * `SupportQuery(BaseModel)`: `message`, `channel`, optional `metadata`.
-  * `SupportReply(BaseModel)`: `answer`, `sources`, `confidence`, `escalation_flag`.
-* `hr.py`, `legal.py`, etc.:
-
-  * Request/response models that match the actions of that domain:
-
-    * HR: `HRQuestion`, `CVMatchRequest`, `CVMatchResult`.
-    * Legal: `ContractReviewRequest`, `ClauseRisk`, `ContractReviewResponse`.
-* Common patterns:
-
-  * Keep them small, strongly typed, with docstrings.
+# Run with watch mode
+make test-watch
+```
 
 ---
 
-### 11. `backend/universal_copilot/api/routes_support.py` (pattern for others)  ✅
+## Deployment
 
-**Why:** Entry point for one domain (Support Copilot).
+### Docker Compose (Development/Small Scale)
 
-**Should contain:**
+```bash
+# Start the full stack
+make compose-up
 
-* `router = APIRouter(prefix="/support", tags=["support"])`.
+# View logs
+make compose-logs
 
-* Route like:
+# Stop the stack
+make compose-down
+```
 
-  ```python
-  @router.post("/query", response_model=SupportReply)
-  async def support_query(payload: SupportQuery, deps: = Depends(...)):
-      tenant = deps.tenant
-      crew = crew_registry.get_crew("support", tenant)
-      result = await crew.run_support_flow(payload)
-      return result
-  ```
+### Kubernetes (Production)
 
-* Use dependency injection for:
+```bash
+# Deploy to cluster
+make k8s-apply
 
-  * DB session,
-  * tenant/auth context,
-  * crew registry.
+# View logs
+make k8s-logs
 
-Repeat the same pattern for `routes_hr.py`, `routes_legal.py`, etc. with their own schemas and crew calls.
+# Remove deployment
+make k8s-destroy
+```
 
----
+### Environment-Specific Configs
 
-### 12. `config/tenants/*.yaml`  ✅
-
-**Why:** How each tenant “installs” use cases without code changes.
-
-**Each tenant YAML should contain:**
-
-* Basic info: `id`, `name`, `default_provider`.
-* `enabled_use_cases`: list like `[support, hr, legal]`.
-* `llm_policies`:
-
-  * per use_case: provider + model + max_tokens.
-* `tools_allowed`:
-
-  * per use_case: allowed MCP tool names (e.g., `support_rag.query`, `crm.lookup_customer`).
-
-Backend loads these at startup and caches in DB.
+- `config/dev.yaml` - Development settings
+- `config/prod.yaml` - Production settings with optimizations
 
 ---
 
-### 13. `config/use_cases/*.yaml`  ✅
+## Documentation
 
-**Why:** Declarative mapping from use-case name to crew and tools.
+Comprehensive documentation is available in the `docs/` directory:
 
-**Each file should contain:**
-
-* Internal use-case ID and description.
-* Default crew name (e.g., `support_crew_v1`).
-* Langflow flow IDs (e.g. `support_rag`, `support_escalation`).
-* Default MCP virtual server name in Context Forge (e.g. `support_toolbox`).
-
----
-
-## Tier 2 – AI Core: LLM Gateway, Crews, RAG
-
-These are the “brain” parts.
-
-### 14. `backend/universal_copilot/llm/gateway.py`  ✅✅
-
-**Why:** Single API to all LLM providers + quotas + logging.
-
-**Should contain:**
-
-* `async def generate(tenant_id, use_case, messages, tools=None, **opts)`:
-
-  * Resolve which provider/model to use from tenant + use_case config.
-  * Call appropriate provider implementation (`BaseProvider.generate`).
-  * Enforce quotas (via `quotas.py`).
-  * Log call to `governance/logger.py`.
-* Support for:
-
-  * tool calling (if provider supports function/tool schema).
-  * streaming (optional).
+- [Architecture Overview](docs/architecture-overview.md)
+- [MCP Architecture](docs/mcp-architecture.md)
+- [CrewAI Agents & Crews](docs/crewai-agents-crews.md)
+- [Langflow Flows](docs/langflow-flows.md)
+- [Governance & Compliance](docs/governance-watsonx.md)
+- [Use Case Guides](docs/use-cases/)
 
 ---
 
-### 15. `backend/universal_copilot/llm/providers/base.py`
+## Project Structure
 
-**Why:** Abstract interface for providers.
-
-**Should contain:**
-
-* `class BaseProvider(ABC)` with:
-
-  * `name`, `supports_tools`, `supports_streaming`.
-  * `async def generate(self, messages, tools=None, **opts)`.
-
----
-
-### 16. `backend/universal_copilot/llm/providers/openai_provider.py`, `anthropic_provider.py`, `watsonx_provider.py`, `ollama_provider.py`
-
-**Why:** Concrete implementations.
-
-**Each file should contain:**
-
-* Provider-specific config (API base URL, api_key resolution).
-* Implementation of `generate(...)` that:
-
-  * Prepares request in provider’s format.
-  * Handles errors & retries.
-* Example: OpenAI uses Chat Completions; Claude uses Messages; watsonx.ai uses IBM generative endpoints; Ollama calls `POST /api/chat` or `/api/generate` on the local container. ([GitHub][1])
-
----
-
-### 17. `backend/universal_copilot/crew/base_crew.py`  ✅✅
-
-**Why:** Standard pattern for building a CrewAI crew. ([CrewAI Documentation][7])
-
-**Should contain:**
-
-* Helper for building a `Crew`:
-
-  * Injects:
-
-    * LLM gateway as tool.
-    * MCP client tools (so agents can call MCP tools via Context Forge).
-    * Shared memory / knowledge configuration.
-* Base class for `DomainCrew` with method like `run(payload)` that child crews implement.
+```
+universal-copilot-platform/
+├── backend/
+│   └── universal_copilot/
+│       ├── main.py              # FastAPI application
+│       ├── settings.py          # Configuration management
+│       ├── api/                 # REST API routes
+│       ├── auth/                # Authentication & multi-tenancy
+│       ├── crew/                # CrewAI multi-agent orchestration
+│       ├── db/                  # Database models & sessions
+│       ├── llm/                 # LLM gateway & providers
+│       ├── mcp_host/            # MCP client & server
+│       ├── rag/                 # RAG vector search
+│       └── schemas/             # Pydantic models
+├── config/
+│   ├── base.yaml                # Base configuration
+│   ├── dev.yaml                 # Development overrides
+│   ├── prod.yaml                # Production overrides
+│   ├── tenants/                 # Tenant configurations
+│   └── use_cases/               # Use case definitions
+├── flows/                       # Langflow flow definitions
+├── mcp/
+│   ├── servers/                 # MCP tool servers
+│   └── config/                  # MCP virtual server configs
+├── scripts/                     # Utility scripts
+├── tests/                       # Test suite
+├── infra/
+│   ├── k8s/                     # Kubernetes manifests
+│   ├── helm/                    # Helm charts
+│   └── openshift/               # OpenShift configs
+├── docs/                        # Documentation
+├── pyproject.toml               # Project metadata & dependencies
+├── Makefile                     # Development automation
+├── docker-compose.yml           # Local stack orchestration
+└── README.md                    # This file
+```
 
 ---
 
-### 18. `backend/universal_copilot/crew/tools.py`
+## Contributing
 
-**Why:** Tools accessible by agents (CrewAI). ([CrewAI Documentation][8])
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
-**Should contain:**
+### Development Workflow
 
-* `MCPTool` wrapper:
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Run quality checks (`make qa`)
+5. Run tests (`make test`)
+6. Commit your changes (`git commit -m 'Add amazing feature'`)
+7. Push to the branch (`git push origin feature/amazing-feature`)
+8. Open a Pull Request
 
-  * Knows how to call Context Forge MCP endpoint (via `mcp_host.client`).
-  * Accepts a tool name (e.g. `support_rag.query`) and arguments.
-* Possibly specialized wrappers:
+### Code Standards
 
-  * `VectorSearchTool` (calls RAG service).
-  * `DBTool` (limited DB queries for analytics, not raw DB).
-* Tools should conform to CrewAI tool interface (name, description, args). ([CrewAI Documentation][8])
-
----
-
-### 19. `backend/universal_copilot/crew/registry.py`
-
-**Why:** Map use-case string → actual crew builder.
-
-**Should contain:**
-
-* `CREW_BUILDERS = {"support": build_support_crew, ...}`
-* `def get_crew(use_case: str, tenant: Tenant) -> Crew:` that:
-
-  * Reads `use_cases/*.yaml` and tenant overrides.
-  * Instantiates appropriate crew from `*_crew.py`.
+- Follow PEP 8 style guide
+- Add comprehensive docstrings (Google style)
+- Include type hints for all functions
+- Write tests for new features
+- Maintain >80% code coverage
 
 ---
 
-### 20. `backend/universal_copilot/crew/support_crew.py` (pattern for others)
+## License
 
-**Why:** Concrete multi-agent design for Support.
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
 
-**Should contain:**
+```
+Copyright 2025 Ruslan Magana
 
-* Agent definitions (CrewAI `Agent` objects) with:
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-  * `SupportIntakeAgent` (classify, parse message).
-  * `SupportRAGAgent` (calls MCP tool `support_rag.query`).
-  * `SupportAnswerAgent` (LLM reasoning).
-  * `GuardrailAgent`.
-* Crew definition:
+    http://www.apache.org/licenses/LICENSE-2.0
 
-  * `Crew(agents=[...], tasks=[...], process="sequential_or_hierarchical")`.
-* A method `async def run_support_flow(payload: SupportQuery) -> SupportReply`.
-
-Replicate similar pattern in `hr_crew.py`, `legal_crew.py`, etc., each with domain-relevant agents. ([CrewAI Documentation][8])
-
----
-
-### 21. `backend/universal_copilot/rag/vector_client.py`
-
-**Why:** RAG vector DB abstraction.
-
-**Should contain:**
-
-* Client wrapper for chosen vector DB (Milvus, pgvector, etc.), tuned for multi-tenancy. ([FastAPI][2])
-* Methods:
-
-  * `create_index(tenant_id, use_case, name)`.
-  * `upsert(tenant_id, use_case, docs: list)`.
-  * `query(tenant_id, use_case, query_text, top_k)`.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
 
 ---
 
-### 22. `backend/universal_copilot/rag/indexes.py`
+## Author
 
-**Why:** Consistent naming & partitioning.
+**Ruslan Magana**
 
-**Should contain:**
-
-* Functions to build index names:
-
-  * `def index_name(tenant_id, use_case, source):`
-  * e.g. `tenantA__support__kb`.
-* Optional helper to map to vector partitions/collections.
+- Website: [ruslanmv.com](https://ruslanmv.com)
+- Email: contact@ruslanmv.com
+- GitHub: [@ruslanmv](https://github.com/ruslanmv)
 
 ---
 
-### 23. `backend/universal_copilot/rag/ingestion.py`
+## Acknowledgments
 
-**Why:** Document ingestion pipeline.
+Built with these excellent open-source projects:
 
-**Should contain:**
-
-* Functions like:
-
-  * `ingest_from_sharepoint(tenant, use_case, site_url, ...)`
-  * `ingest_from_confluence(...)`
-* Pipeline steps:
-
-  * load → clean → chunk → embed → store via `vector_client`.
+- [FastAPI](https://fastapi.tiangolo.com/) - Modern web framework
+- [CrewAI](https://www.crewai.com/) - Multi-agent orchestration
+- [Langflow](https://www.langflow.org/) - Visual AI workflows
+- [UV](https://github.com/astral-sh/uv) - Python package manager
+- [Ruff](https://github.com/astral-sh/ruff) - Fast Python linter
+- [MCP](https://modelcontextprotocol.io/) - Model Context Protocol
+- [IBM mcp-context-forge](https://github.com/IBM/mcp-context-forge) - MCP gateway
 
 ---
 
-## Tier 3 – MCP & Context Forge Integration
+## Support
 
-These make the app **standards-aligned** and “plug-and-play” with the MCP ecosystem.
+For support, please:
 
-### 24. `backend/universal_copilot/mcp_host/client.py`  ✅✅
-
-**Why:** Our platform as MCP host, calling tools via Context Forge.
-
-**Should contain:**
-
-* A client that:
-
-  * Maintains connection to Context Forge’s MCP endpoint (supports SSE/HTTP/WebSocket). ([GitHub][9])
-  * Exposes `async def call_tool(tool_name, args, tenant_context)`:
-
-    * add tenant context in metadata.
-    * invoke MCP tool via Context Forge (which routes to correct server or REST).
-* Optional caching of tool schema descriptions.
+- Open an issue on [GitHub Issues](https://github.com/ruslanmv/universal-copilot-platform/issues)
+- Check the [documentation](docs/)
+- Visit [ruslanmv.com](https://ruslanmv.com) for professional services
 
 ---
 
-### 25. `backend/universal_copilot/mcp_host/server.py` (optional but powerful)
+<div align="center">
 
-**Why:** Let *other* MCP hosts (Claude desktop, ChatGPT, IDEs) use your platform as a tool server. ([CrewAI Documentation][3])
+Made with ❤️ by [Ruslan Magana](https://ruslanmv.com)
 
-**Should contain:**
+**[⬆ Back to Top](#universal-copilot-platform)**
 
-* Implementation of MCP server protocol:
-
-  * Tool definitions like `support.answer_ticket`, `legal.review_contract`.
-  * When invoked, those tools call the corresponding crews inside your backend.
-* Runs as part of the same container or as a small sidecar.
-
----
-
-### 26. `mcp/servers/langflow_tools_server.py`
-
-**Why:** MCP server that exposes Langflow flows as tools. ([Langflow Documentation][10])
-
-**Should contain:**
-
-* MCP server implementation with tools:
-
-  * `support_rag.query(inputs)`: calls Langflow HTTP API for the `support_rag` flow and returns response.
-  * `hr_policy_rag.query`, etc.
-* Uses `flows/*.flow.json` ids to know which flow to call.
-
-(You may alternatively let Langflow be an MCP server itself and just register it in Context Forge. Docs show Langflow can be MCP server & client. ([Langflow Documentation][10]))
-
----
-
-### 27. `mcp/servers/*.py` (CRM, HRIS, Legal docs, etc.)
-
-**Why:** Wrap legacy REST APIs into MCP tools, if you don’t want to define them only in Context Forge.
-
-**Each file should contain:**
-
-* Tools that call a specific system:
-
-  * `crm.lookup_customer` → REST call to CRM.
-  * `hr.get_employee_benefits` → HRIS call.
-  * `legal_docs.search` → internal legal doc search.
-
----
-
-### 28. `mcp/config/context-forge-virtual-server.yaml`  ✅
-
-**Why:** Define tool sets (virtual servers) in Context Forge. ([GitHub][9])
-
-**Should contain:**
-
-* Config describing:
-
-  * Upstream MCP servers (Langflow server, CRM server, HR server, etc.).
-  * Virtual servers for:
-
-    * `support_toolbox` – includes `support_rag.query`, `crm.lookup_customer`, `ticket.create`.
-    * `hr_toolbox` – HR-related tools.
-    * `legal_toolbox` – legal tools.
-* Auth & rate limit policies per virtual server.
-
----
-
-### 29. `infra/k8s/mcp-context-forge-deployment.yaml` & `mcp-context-forge-service.yaml`
-
-**Why:** Actually run Context Forge in your cluster. ([GitHub][9])
-
-**Should contain:**
-
-* Deployment with:
-
-  * Container image `ghcr.io/ibm/mcp-context-forge:tag` (or similar).
-  * Env vars for Redis (if used), config mount for MCP server registry.
-* Service exposing MCP endpoint inside cluster.
-
----
-
-## Tier 4 – Infra, Dev UX, Frontend, Docs
-
-These make the platform usable and deployable.
-
-### 30. `docker-compose.yml`
-
-**Why:** Easiest way for devs to run everything locally.
-
-**Should contain:**
-
-* Services:
-
-  * `backend` – FastAPI + CrewAI.
-  * `langflow` – Langflow server (MCP-enabled). ([Langflow Documentation][10])
-  * `mcp-context-forge`.
-  * `postgres`.
-  * `vector-db` (Milvus/Weaviate/pgvector).
-  * `ollama` (optional for local models). ([GitHub][1])
-
----
-
-### 31. `infra/helm/*` & `infra/k8s/*`
-
-**Why:** Production-ready deployment (Kubernetes).
-
-**Should contain:**
-
-* `values.yaml` – toggles for each service, resource limits.
-* Templates:
-
-  * backend Deployment + Service.
-  * Langflow Deployment + Service.
-  * Context Forge Deployment + Service.
-  * Postgres & vector DB statefulsets.
-  * Ingress routing to backend + Langflow UIs.
-
----
-
-### 32. `frontend/admin-console/*`
-
-**Why:** Admin UI to manage tenants, providers, use cases.
-
-**Important contents:**
-
-* `pages/TenantsPage.tsx`:
-
-  * CRUD for tenant configs (id, enabled use cases, provider prefs).
-* `pages/UseCasesPage.tsx`:
-
-  * Toggle which use cases are active for each tenant.
-* `pages/ProvidersPage.tsx`:
-
-  * Manage provider configs per tenant.
-* Components to:
-
-  * Show LLM usage metrics.
-  * Show errors/logs per tenant/use case.
-
----
-
-### 33. `frontend/widgets/*`
-
-**Why:** Drop-in client widgets:
-
-* `support-chat-widget`:
-
-  * `SupportChat.tsx` → front-end chat UI, calling `/api/support/query`.
-  * `embed.js` → snippet to add `<script src=...>`, auto-mount widget on customer site.
-* `knowledge-search-widget`:
-
-  * Minimal search bar + results panel.
-
----
-
-### 34. `docs/*`
-
-**Why:** Reference for new devs and ops.
-
-* `architecture-overview.md`:
-
-  * Explain layers (MCP host, Context Forge, CrewAI, Langflow, LLM gateway).
-* `crewai-agents-crews.md`:
-
-  * Patterns for designing agents & crews. ([CrewAI Documentation][8])
-* `langflow-flows.md`:
-
-  * How to design flows and expose them as MCP tools in Langflow. ([Langflow Documentation][10])
-* `mcp-architecture.md`:
-
-  * How Context Forge sits between MCP servers & our backend, plus examples of virtual server config. ([GitHub][9])
-* `governance-watsonx.md`:
-
-  * How model calls are logged and exported to watsonx.governance as external models/use cases. ([GitHub][1])
-
----
-
-### 35. `scripts/install.sh`
-
-**Why:** One-command dev setup using uv.
-
-**Should contain:**
-
-* Shell script that:
-
-  * Installs uv if missing (using official installer). ([docs.astral.sh][11])
-  * Runs `uv sync`.
-  * Runs `docker-compose up -d` for infra.
-  * Runs `uvx universal-copilot dev`.
-
----
-
-### 36. `scripts/init_dev_data.py`, `scripts/load_demo_documents.py`, `scripts/import_flows_to_langflow.py`
-
-**Why:** Developer convenience.
-
-* `init_dev_data.py`:
-
-  * Creates example tenants and use-case configs in DB.
-* `load_demo_documents.py`:
-
-  * Loads sample docs for each use case into vector DB.
-* `import_flows_to_langflow.py`:
-
-  * Reads `flows/*.flow.json` and uses Langflow API to import them. ([Langflow Documentation][10])
-
----
+</div>

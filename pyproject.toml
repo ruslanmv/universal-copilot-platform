@@ -4,75 +4,276 @@ build-backend = "hatchling.build"
 
 [project]
 name = "universal-copilot-platform"
-version = "0.1.0"
-description = "Universal multi-tenant AI copilot platform (CrewAI + Langflow + MCP + multi-LLM)."
+version = "1.0.0"
+description = "Enterprise-grade multi-tenant AI copilot platform with CrewAI, Langflow, MCP, and multi-LLM support"
 readme = "README.md"
 requires-python = ">=3.11,<3.14"
-license = { text = "Proprietary" }
+license = { text = "Apache-2.0" }
 authors = [
-  { name = "Your Company", email = "dev@yourcompany.com" },
+  { name = "Ruslan Magana", email = "contact@ruslanmv.com" },
+]
+maintainers = [
+  { name = "Ruslan Magana", email = "contact@ruslanmv.com" },
+]
+keywords = [
+  "ai",
+  "copilot",
+  "multi-tenant",
+  "crewai",
+  "langflow",
+  "mcp",
+  "llm",
+  "rag",
+  "enterprise",
+  "openai",
+  "anthropic",
+  "watsonx",
+]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Information Technology",
+  "License :: OSI Approved :: Apache Software License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Software Development :: Libraries :: Application Frameworks",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Typing :: Typed",
 ]
 
 dependencies = [
-  # Web API
-  "fastapi>=0.115.0",
-  "uvicorn[standard]>=0.30.0",
+  # Web API Framework
+  "fastapi==0.115.6",
+  "uvicorn[standard]==0.32.1",
 
-  # Config & validation
-  "pydantic>=2.8.0",
-  "pydantic-settings>=2.3.0",
-  "pyyaml>=6.0.0",
+  # Configuration & Validation
+  "pydantic==2.10.3",
+  "pydantic-settings==2.6.1",
+  "pyyaml==6.0.2",
 
-  # DB & ORM
-  "sqlalchemy>=2.0.35",
-  "asyncpg>=0.28.0",          # async Postgres driver
-  "alembic>=1.13.2",
+  # Database & ORM
+  "sqlalchemy==2.0.36",
+  "asyncpg==0.30.0",
+  "alembic==1.14.0",
 
-  # HTTP client
-  "httpx[http2]>=0.27.0",
+  # HTTP Client
+  "httpx[http2]==0.28.1",
 
-  # LLMs / multi-agent / Langflow
-  "openai>=1.51.0",
-  "anthropic>=0.40.0",
-  "crewai[tools]>=0.60.0",
-  # langflow is typically deployed as a separate service; we just need an HTTP client:
-  # "langflow>=1.0.0",  # optional, only if you embed it
+  # AI & Multi-Agent Orchestration
+  "openai==1.57.4",
+  "anthropic==0.40.0",
+  "crewai[tools]==0.86.0",
 
-  # MCP / SSE / WS (for Context Forge, etc.)
-  "websockets>=12.0",
-  "sse-starlette>=2.1.0",
+  # MCP & Streaming
+  "websockets==14.1",
+  "sse-starlette==2.2.1",
 
-  # Misc
-  "python-dotenv>=1.0.1",
-  "loguru>=0.7.2",
+  # CLI Interface
+  "typer==0.15.1",
+  "rich==13.9.4",
+
+  # Utilities
+  "python-dotenv==1.0.1",
+  "loguru==0.7.3",
+  "tenacity==9.0.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-  "pytest>=8.0.0",
-  "pytest-asyncio>=0.23.0",
-  "httpx>=0.27.0",
-  "ruff>=0.5.0",
-  "mypy>=1.10.0",
+  # Testing
+  "pytest==8.3.4",
+  "pytest-asyncio==0.24.0",
+  "pytest-cov==6.0.0",
+  "pytest-mock==3.14.0",
+  "httpx==0.28.1",
+
+  # Code Quality
+  "ruff==0.8.4",
+  "mypy==1.13.0",
+  "pre-commit==4.0.1",
+
+  # Type Stubs
+  "types-pyyaml==6.0.12.20240917",
 ]
 
+watsonx = [
+  "ibm-watsonx-ai==1.1.21",
+  "ibm-cloud-sdk-core==3.22.2",
+]
+
+all = [
+  "universal-copilot-platform[dev,watsonx]",
+]
+
+[project.urls]
+Homepage = "https://ruslanmv.com"
+Documentation = "https://github.com/ruslanmv/universal-copilot-platform#readme"
+Repository = "https://github.com/ruslanmv/universal-copilot-platform"
+Issues = "https://github.com/ruslanmv/universal-copilot-platform/issues"
+Changelog = "https://github.com/ruslanmv/universal-copilot-platform/blob/main/CHANGELOG.md"
+
 [project.scripts]
-# This is the main CLI entrypoint for uvx:
 universal-copilot = "backend.universal_copilot.main:cli"
 
 [tool.uv]
-# You can pin Python or required environments if you like
-# required-python = ">=3.11,<3.14"
+dev-dependencies = [
+  "pytest==8.3.4",
+  "pytest-asyncio==0.24.0",
+  "pytest-cov==6.0.0",
+  "pytest-mock==3.14.0",
+  "ruff==0.8.4",
+  "mypy==1.13.0",
+  "pre-commit==4.0.1",
+]
 
 [tool.uv.sources]
-# Tell uv where to find the package code
-backend = { path = "backend" }
+
+[tool.hatch.build.targets.wheel]
+packages = ["backend"]
 
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+extend-exclude = [
+  ".git",
+  ".venv",
+  "__pycache__",
+  "*.pyc",
+  "build",
+  "dist",
+  ".eggs",
+  "*.egg-info",
+]
+
+[tool.ruff.lint]
+select = [
+  "E",      # pycodestyle errors
+  "W",      # pycodestyle warnings
+  "F",      # pyflakes
+  "I",      # isort
+  "N",      # pep8-naming
+  "UP",     # pyupgrade
+  "ANN",    # flake8-annotations
+  "ASYNC",  # flake8-async
+  "B",      # flake8-bugbear
+  "C4",     # flake8-comprehensions
+  "DTZ",    # flake8-datetimez
+  "T10",    # flake8-debugger
+  "DJ",     # flake8-django
+  "EM",     # flake8-errmsg
+  "EXE",    # flake8-executable
+  "ISC",    # flake8-implicit-str-concat
+  "ICN",    # flake8-import-conventions
+  "LOG",    # flake8-logging
+  "G",      # flake8-logging-format
+  "PIE",    # flake8-pie
+  "T20",    # flake8-print
+  "PYI",    # flake8-pyi
+  "PT",     # flake8-pytest-style
+  "Q",      # flake8-quotes
+  "RSE",    # flake8-raise
+  "RET",    # flake8-return
+  "SLF",    # flake8-self
+  "SLOT",   # flake8-slots
+  "SIM",    # flake8-simplify
+  "TID",    # flake8-tidy-imports
+  "TCH",    # flake8-type-checking
+  "ARG",    # flake8-unused-arguments
+  "PTH",    # flake8-use-pathlib
+  "ERA",    # eradicate
+  "PD",     # pandas-vet
+  "PGH",    # pygrep-hooks
+  "PL",     # pylint
+  "TRY",    # tryceratops
+  "FLY",    # flynt
+  "NPY",    # numpy-specific rules
+  "PERF",   # perflint
+  "RUF",    # ruff-specific rules
+]
+
+ignore = [
+  "ANN101",  # Missing type annotation for self
+  "ANN102",  # Missing type annotation for cls
+  "ANN401",  # Dynamically typed expressions (Any) are disallowed
+  "TRY003",  # Avoid specifying long messages outside exception class
+  "PLR0913", # Too many arguments
+  "PLR2004", # Magic value used in comparison
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401", "E402"]
+"tests/**/*.py" = [
+  "ANN",     # No type annotations required in tests
+  "PLR2004", # Magic values are OK in tests
+  "S101",    # Assert is OK in tests
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
 
 [tool.mypy]
 python_version = "3.11"
-strict = false
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = true
+disallow_untyped_decorators = false
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+strict_equality = true
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+  "crewai.*",
+  "langflow.*",
+  "ibm_watsonx_ai.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = [
+  "-ra",
+  "-q",
+  "--strict-markers",
+  "--strict-config",
+  "--cov=backend",
+  "--cov-report=term-missing",
+  "--cov-report=html",
+  "--cov-report=xml",
+]
+testpaths = ["tests"]
+pythonpath = ["."]
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+source = ["backend"]
+omit = [
+  "*/tests/*",
+  "*/test_*.py",
+  "*/__pycache__/*",
+  "*/venv/*",
+  "*/.venv/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+  "pragma: no cover",
+  "def __repr__",
+  "if TYPE_CHECKING:",
+  "raise AssertionError",
+  "raise NotImplementedError",
+  "if __name__ == .__main__.:",
+  "@abstractmethod",
+  "@abc.abstractmethod",
+]
