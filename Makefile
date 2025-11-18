@@ -1,24 +1,40 @@
-# ============================================================================
-# Universal Copilot Platform - Production Makefile
-# ============================================================================
-# Author: Ruslan Magana (ruslanmv.com)
+# ==============================================================================
+# Universal Copilot Platform - World-Class Self-Documenting Makefile
+# ==============================================================================
+# Author: Ruslan Magana (https://ruslanmv.com)
 # License: Apache-2.0
-# ============================================================================
+#
+# This Makefile provides a comprehensive set of targets for development,
+# testing, deployment, and CI/CD workflows. All targets are self-documented
+# and color-coded for better usability.
+#
+# Quick Start:
+#   make help          - Show all available targets
+#   make setup         - Complete project setup
+#   make dev           - Start development server
+#   make test          - Run test suite
+# ==============================================================================
 
 .DEFAULT_GOAL := help
 
-# ============================================================================
+# ==============================================================================
 # Configuration Variables
-# ============================================================================
+# ==============================================================================
 
 # Python & UV
 PYTHON := python3
 UV := uv
 UV_RUN := $(UV) run
+PYTEST := $(UV_RUN) pytest
+RUFF := $(UV_RUN) ruff
+MYPY := $(UV_RUN) mypy
+BANDIT := $(UV_RUN) bandit
+PRE_COMMIT := $(UV_RUN) pre-commit
 
 # Project
 PROJECT_NAME := universal-copilot-platform
 BACKEND_MODULE := backend.universal_copilot
+VERSION := $(shell grep '^version = ' pyproject.toml | cut -d'"' -f2)
 
 # Docker & Registry
 REGISTRY ?= ghcr.io/ruslanmv
@@ -29,6 +45,7 @@ FULL_IMAGE ?= $(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG)
 # Kubernetes / OpenShift
 K8S_NAMESPACE ?= universal-copilot
 K8S_STACK_FILE ?= infra/k8s/stack.yaml
+K8S_CONTEXT := $(shell kubectl config current-context 2>/dev/null || echo "none")
 
 # Directories
 SRC_DIRS := backend scripts mcp
@@ -36,13 +53,19 @@ TEST_DIR := tests
 DOCS_DIR := docs
 BUILD_DIR := dist
 COV_DIR := htmlcov
+CONFIG_DIR := config
 
-# Colors for output
+# Colors for output (enhanced)
+BLUE := \033[0;34m
 CYAN := \033[0;36m
 GREEN := \033[0;32m
 YELLOW := \033[0;33m
 RED := \033[0;31m
-NC := \033[0m # No Color
+MAGENTA := \033[0;35m
+WHITE := \033[0;37m
+BOLD := \033[1m
+RESET := \033[0m
+NC := $(RESET)
 
 # ============================================================================
 # Help Target (Self-Documenting)
@@ -171,8 +194,20 @@ typecheck: ## Run mypy type checker
 	$(UV_RUN) mypy $(SRC_DIRS)
 
 .PHONY: security
-security: ## Run security checks (TODO: add bandit)
-	@echo "$(YELLOW)Security checks not yet implemented$(NC)"
+security: ## Run security checks with bandit
+	@echo "$(GREEN)Running security scanner...$(NC)"
+	$(BANDIT) -r $(SRC_DIRS) -c pyproject.toml || echo "$(YELLOW)⚠️  Security issues found$(NC)"
+	@echo "$(GREEN)✓ Security scan complete$(NC)"
+
+.PHONY: security-deps
+security-deps: ## Check for vulnerable dependencies
+	@echo "$(GREEN)Checking dependencies for vulnerabilities...$(NC)"
+	$(UV_RUN) safety check || echo "$(YELLOW)⚠️  Vulnerable dependencies found$(NC)"
+	@echo "$(GREEN)✓ Dependency security check complete$(NC)"
+
+.PHONY: audit
+audit: security security-deps ## Run all security audits
+	@echo "$(GREEN)✓ Complete security audit finished!$(NC)"
 
 .PHONY: qa
 qa: lint format-check typecheck ## Run all quality checks
