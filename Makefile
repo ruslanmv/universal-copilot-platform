@@ -171,14 +171,19 @@ typecheck: ## Run mypy type checker
 	$(UV_RUN) mypy $(SRC_DIRS)
 
 .PHONY: security
-security: ## Run security checks (TODO: add bandit)
-	@echo "$(YELLOW)Security checks not yet implemented$(NC)"
+security: ## Run bandit security checks
+	@echo "$(GREEN)Running security checks with bandit...$(NC)"
+	$(UV_RUN) bandit -c pyproject.toml -r $(SRC_DIRS)
+
+.PHONY: audit
+audit: lint format-check typecheck security ## Run comprehensive code audit (lint, format, types, security)
+	@echo "$(GREEN)✓ Code audit completed successfully$(NC)"
 
 .PHONY: qa
-qa: lint format-check typecheck ## Run all quality checks
+qa: audit ## Run all quality checks (alias for audit)
 
 .PHONY: ci
-ci: qa test-cov ## Run full CI pipeline (lint, format, typecheck, tests)
+ci: audit test-cov ## Run full CI pipeline (audit + tests with coverage)
 	@echo "$(GREEN)✓ CI pipeline completed successfully$(NC)"
 
 .PHONY: pre-commit-install
